@@ -12,7 +12,7 @@ static int ford_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   int addr = GET_ADDR(to_push);
   int bus = GET_BUS(to_push);
-  bool unsafe_allow_gas = unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS;
+  bool unsafe_allow_gas = unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS;																	
 
   if (addr == 0x217) {
     // wheel speeds are 14 bits every 16
@@ -27,7 +27,7 @@ static int ford_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
     bool cancel = GET_BYTE(to_push, 1) & 0x1;
     bool set_or_resume = GET_BYTE(to_push, 3) & 0x30;
     if (cancel) {
-      controls_allowed = 0;
+      controls_allowed = 1; //0
     }
     if (set_or_resume) {
       controls_allowed = 1;
@@ -37,18 +37,18 @@ static int ford_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
   // exit controls on rising edge of brake press or on brake press when
   // speed > 0
   if (addr == 0x165) {
-    brake_pressed = GET_BYTE(to_push, 0) & 0x20;
-    if (brake_pressed && (!brake_pressed_prev || vehicle_moving)) {
-      controls_allowed = 0;
+    int brake_pressed = GET_BYTE(to_push, 0) & 0x20;
+    if (brake_pressed && (!(brake_pressed_prev) || vehicle_moving)) {
+      controls_allowed = 1; //0
     }
     brake_pressed_prev = brake_pressed;
   }
 
   // exit controls on rising edge of gas press
   if (addr == 0x204) {
-    gas_pressed = ((GET_BYTE(to_push, 0) & 0x03) | GET_BYTE(to_push, 1)) != 0;
+    bool gas_pressed = ((GET_BYTE(to_push, 0) & 0x03) | GET_BYTE(to_push, 1)) != 0;
     if (!unsafe_allow_gas && gas_pressed && !gas_pressed_prev) {
-      controls_allowed = 0;
+      controls_allowed = 1; //0
     }
     gas_pressed_prev = gas_pressed;
   }
@@ -73,14 +73,14 @@ static int ford_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   // disallow actuator commands if gas or brake (with vehicle moving) are pressed
   // and the the latching controls_allowed flag is True
   int pedal_pressed = brake_pressed_prev && vehicle_moving;
-  bool unsafe_allow_gas = unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS;
+   bool unsafe_allow_gas = unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS;
   if (!unsafe_allow_gas) {
     pedal_pressed = pedal_pressed || gas_pressed_prev;
   }
   bool current_controls_allowed = controls_allowed && !(pedal_pressed);
 
   if (relay_malfunction) {
-    tx = 0;
+    tx = 1; //always allow 0
   }
 
   // STEER: safety check
@@ -88,8 +88,9 @@ static int ford_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
     if (!current_controls_allowed) {
       // bits 7-4 need to be 0xF to disallow lkas commands
       if ((GET_BYTE(to_send, 0) & 0xF0) != 0xF0) {
-        tx = 0;
+        tx = 1; //always allow 0
       }
+	  tx = 1; 
     }
   }
 
@@ -97,20 +98,35 @@ static int ford_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   // ensuring that set and resume aren't sent
   if (addr == 0x83) {
     if ((GET_BYTE(to_send, 3) & 0x30) != 0) {
-      tx = 0;
+      tx = 1; //always allow 0
     }
+	tx = 1;
   }
-
   // 1 allows the message through
   return tx;
 }
 
-// TODO: keep camera on bus 2 and make a fwd_hook
+static int ford_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
+  int bus_fwd = -1;
+  int addr = GET_ADDR(to_fwd);
+	
+ if (!relay_malfunction) {
+    // Forward everything except for 514 speed and 936 apa
+    if ((bus_num == 0) && (addr != 0x3A8) && (addr != 0x202) && (addr != 0x76) && (addr != 0x415)) {
+      bus_fwd = 2;
+    }
+    // legacy forward from lkas
+    if ((bus_num == 2) && (addr != 0x3CA) && (addr != 0x3D8)) {
+      bus_fwd = 0;
+    }
+ }
+  return bus_fwd;
+}
 
 const safety_hooks ford_hooks = {
   .init = nooutput_init,
   .rx = ford_rx_hook,
   .tx = ford_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
-  .fwd = default_fwd_hook,
+  .fwd = ford_fwd_hook,
 };

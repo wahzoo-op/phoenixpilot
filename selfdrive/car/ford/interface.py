@@ -2,7 +2,8 @@
 from cereal import car
 from selfdrive.swaglog import cloudlog
 from selfdrive.config import Conversions as CV
-from selfdrive.car.ford.values import MAX_ANGLE
+#from selfdrive.controls.lib.drive_helpers import EventTypes as ET, create_event
+from selfdrive.car.ford.values import MAX_ANGLE, CAR
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
@@ -14,23 +15,48 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / 3.0
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=None):
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]): # pylint: disable=dangerous-default-value
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
     ret.carName = "ford"
+    ret.communityFeature = True                              
     ret.safetyModel = car.CarParams.SafetyModel.ford
-    ret.dashcamOnly = True
+    ret.dashcamOnly = False
+    
+    if candidate in [CAR.F150, CAR.F150SG]:
+      ret.wheelbase = 3.68
+      ret.steerRatio = 18.0
+      ret.mass = 4770. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGain = 4.0
+      ret.lateralTuning.indi.outerLoopGain = 3.5
+      ret.lateralTuning.indi.timeConstant = 2.0
+      ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      ret.steerActuatorDelay = 0.3
+      ret.steerLimitTimer = 0.8
+      ret.steerRateCost = 1.0
+      ret.centerToFront = ret.wheelbase * 0.44
+      tire_stiffness_factor = 0.5328
+    elif candidate in [CAR.FUSION, CAR.FUSIONSG, CAR.MONDEO]:
+      ret.wheelbase = 2.85
+      ret.steerRatio = 14.8
+      ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.01], [0.005]]     # TODO: tune this
+      ret.lateralTuning.pid.kf = 1. / MAX_ANGLE   # MAX Steer angle to normalize FF
+      ret.steerActuatorDelay = 0.1  # Default delay, not measured yet
+      ret.steerLimitTimer = 0.8
+      ret.steerRateCost = 1.0
+      ret.centerToFront = ret.wheelbase * 0.44
+      tire_stiffness_factor = 0.5328
+    
+    #INDI tuning TODO: Tune
+    #ret.lateralTuning.init('indi')
+    #ret.lateralTuning.indi.innerLoopGain = 1.0
+    #ret.lateralTuning.indi.outerLoopGain = 1.0
+    #ret.lateralTuning.indi.timeConstant = 1.0
+    #ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+    #ret.steerActuatorDelay = 0.5
 
-    ret.wheelbase = 2.85
-    ret.steerRatio = 14.8
-    ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
-    ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
-    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.01], [0.005]]     # TODO: tune this
-    ret.lateralTuning.pid.kf = 1. / MAX_ANGLE   # MAX Steer angle to normalize FF
-    ret.steerActuatorDelay = 0.1  # Default delay, not measured yet
-    ret.steerLimitTimer = 0.8
-    ret.steerRateCost = 1.0
-    ret.centerToFront = ret.wheelbase * 0.44
-    tire_stiffness_factor = 0.5328
 
     # TODO: get actual value, for now starting with reasonable value for
     # civic and scaling by mass and wheelbase
@@ -52,17 +78,24 @@ class CarInterface(CarInterfaceBase):
   def update(self, c, can_strings):
     # ******************* do can recv *******************
     self.cp.update_strings(can_strings)
+    self.cp_cam.update_strings(can_strings)
 
-    ret = self.CS.update(self.cp)
+    ret = self.CS.update(self.cp, self.cp_cam)
 
-    ret.canValid = self.cp.can_valid
+    #ret = car.CarState.new_message()               
+    ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
+    ret.engineRPM = self.CS.engineRPM
 
     # events
     events = self.create_common_events(ret)
-
-    if self.CS.lkas_state not in [2, 3] and ret.vEgo > 13. * CV.MPH_TO_MS and ret.cruiseState.enabled:
-      events.add(car.CarEvent.EventName.steerTempUnavailableMute)
-
+      
+    if self.CC.enabled_last:
+      #if self.CS.sappHandshake != 2 and self.CC.sappConfig_last != 16:
+      #  events.add(car.CarEvent.EventName.pscmHandshaking)
+      if self.CS.sappHandshake == 2 and self.CC.sappConfig_last == 224:
+        events.add(car.CarEvent.EventName.pscmHandshaked)
+      if self.CS.sappHandshake == 3 and self.CC.sappConfig_last in [16, 224]:
+        events.add(car.CarEvent.EventName.pscmLostHandshake)
     ret.events = events.to_msg()
 
     self.CS.out = ret.as_reader()

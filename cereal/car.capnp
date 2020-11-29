@@ -100,7 +100,10 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     deviceFalling @90;
     fanMalfunction @91;
     cameraMalfunction @92;
-
+    pscmHandshaking @94;
+	pscmHandshaked @95;
+    pscmLostHandshake @96;
+	
     gasUnavailableDEPRECATED @3;
     dataNeededDEPRECATED @16;
     modelCommIssueDEPRECATED @27;
@@ -183,6 +186,13 @@ struct CarState {
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
+ 
+  #apa handshake
+  pscmHandshaking @37 :Bool; #APA Handshaking initial
+  pscmHandshaked @38 :Bool; #APA handshake success
+  pscmLostHandshake @39 :Bool; #APA Lost handshake
+  
+  engineRPM @40 :Float32;
 
   struct WheelSpeeds {
     # optional wheel speeds
