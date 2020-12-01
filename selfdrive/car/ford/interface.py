@@ -3,8 +3,8 @@ from cereal import car
 from selfdrive.swaglog import cloudlog
 from selfdrive.config import Conversions as CV
 #from selfdrive.controls.lib.drive_helpers import EventTypes as ET, create_event
-from selfdrive.car.ford.values import MAX_ANGLE, CAR
-from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
+from selfdrive.car.ford.values import MAX_ANGLE, Ecu, ECU_FINGERPRINT, FINGERPRINTS, CAR
+from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
 
 
@@ -15,14 +15,28 @@ class CarInterface(CarInterfaceBase):
     return float(accel) / 3.0
 
   @staticmethod
-  def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]): # pylint: disable=dangerous-default-value
-    ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
+  def get_params(candidate, fingerprint=gen_empty_fingerprint(), has_relay=False, car_fw=[]): # pylint: disable=dangerous-default-value
+    ret = CarInterfaceBase.get_std_params(candidate, fingerprint, has_relay)
     ret.carName = "ford"
     ret.communityFeature = True                              
     ret.safetyModel = car.CarParams.SafetyModel.ford
     ret.dashcamOnly = False
     
     if candidate in [CAR.F150, CAR.F150SG]:
+      ret.wheelbase = 3.68
+      ret.steerRatio = 18.0
+      ret.mass = 4770. * CV.LB_TO_KG + STD_CARGO_KG
+      ret.lateralTuning.init('indi')
+      ret.lateralTuning.indi.innerLoopGain = 4.0
+      ret.lateralTuning.indi.outerLoopGain = 3.5
+      ret.lateralTuning.indi.timeConstant = 2.0
+      ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      ret.steerActuatorDelay = 0.3
+      ret.steerLimitTimer = 0.8
+      ret.steerRateCost = 1.0
+      ret.centerToFront = ret.wheelbase * 0.44
+      tire_stiffness_factor = 0.5328
+    if candidate == CAR.EDGE:
       ret.wheelbase = 3.68
       ret.steerRatio = 18.0
       ret.mass = 4770. * CV.LB_TO_KG + STD_CARGO_KG
@@ -69,7 +83,7 @@ class CarInterface(CarInterfaceBase):
 
     ret.steerControlType = car.CarParams.SteerControlType.angle
 
-    ret.enableCamera = True
+    ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
     cloudlog.warning("ECU Camera Simulated: %r", ret.enableCamera)
 
     return ret
@@ -85,17 +99,14 @@ class CarInterface(CarInterfaceBase):
     #ret = car.CarState.new_message()               
     ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
     ret.engineRPM = self.CS.engineRPM
-
+    
     # events
     events = self.create_common_events(ret)
+    
+    if self.CS.lkas_state not in [2, 3] and ret.vEgo > 13.* CV.MPH_TO_MS and ret.cruiseState.enabled:
+      events.add(car.CarEvent.EventName.steerTempUnavailableMute)
+      print("PSCM LOCKOUT") 
       
-    if self.CC.enabled_last:
-      #if self.CS.sappHandshake != 2 and self.CC.sappConfig_last != 16:
-      #  events.add(car.CarEvent.EventName.pscmHandshaking)
-      if self.CS.sappHandshake == 2 and self.CC.sappConfig_last == 224:
-        events.add(car.CarEvent.EventName.pscmHandshaked)
-      if self.CS.sappHandshake == 3 and self.CC.sappConfig_last in [16, 224]:
-        events.add(car.CarEvent.EventName.pscmLostHandshake)
     ret.events = events.to_msg()
 
     self.CS.out = ret.as_reader()
