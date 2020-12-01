@@ -47,10 +47,15 @@ class CarController():
       if (frame % 1) == 0:
       #Stock IPMA Message is 33Hz. PSCM accepts commands at 100hz. 
         curvature = self.vehicle_model.calc_curvature(actuators.steerAngle*np.pi/180., CS.out.vEgo)
+        #if self.lkasCounter >= 7:
+        #  self.lkas_action = 0
+        #  self.lkasCounter = 0
+        #else:
         self.lkas_action = 2   # 0-7 accepted. 2 and 4 have action. 
         angle_lim = interp(CS.out.vEgo, ANGLE_MAX_BP, ANGLE_MAX_V)
         apply_steer = clip(apply_steer, -angle_lim, angle_lim)
         self.lastAngle = apply_steer
+        print("LKAS State:", CS.lkas_state, "Current Angle:", CS.out.steeringAngle, "Desired Angle:", self.apply_steer)
         if enabled:
           if self.lastAngle * apply_steer > 0. and abs(apply_steer) > abs(self.lastAngle):
             angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
