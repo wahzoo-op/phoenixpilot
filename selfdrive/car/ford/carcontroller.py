@@ -55,7 +55,7 @@ class CarController():
         angle_lim = interp(CS.out.vEgo, ANGLE_MAX_BP, ANGLE_MAX_V)
         apply_steer = clip(apply_steer, -angle_lim, angle_lim)
         self.lastAngle = apply_steer
-        print("LKAS State:", CS.lkas_state, "Current Angle:", CS.out.steeringAngle, "Desired Angle:", self.apply_steer)
+        print("LKAS State:", CS.lkas_state, "Current Angle:", CS.out.steeringAngle, "Desired Angle:", apply_steer)
         if enabled:
           if self.lastAngle * apply_steer > 0. and abs(apply_steer) > abs(self.lastAngle):
             angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
