@@ -22,7 +22,7 @@ QWidget * OnboardingWindow::terms_screen() {
 
   main_layout->addWidget(title_label("Review Terms"), 0, 0, 1, -1);
 
-  QLabel *terms = new QLabel("See terms at https://my.comma.ai/terms");
+  QLabel *terms = new QLabel("See terms at [REDACTED]");
   terms->setAlignment(Qt::AlignCenter);
   terms->setStyleSheet(R"(
     font-size: 75px;
