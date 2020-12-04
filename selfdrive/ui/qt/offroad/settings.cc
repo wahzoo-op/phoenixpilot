@@ -83,8 +83,8 @@ QWidget * toggles_panel() {
   toggles_list->setSpacing(25);
 
   toggles_list->addWidget(new ParamsToggle("OpenpilotEnabledToggle",
-                                            "Enable Openpilot",
-                                            "Use the openpilot system for adaptive cruise control and lane keep driver assistance. Your attention is required at all times to use this feature. Changing this setting takes effect when the car is powered off.",
+                                            "Enable phoenixpilot",
+                                            "Use the phoenixpilot system for adaptive cruise control and lane keep driver assistance. Your attention is required at all times to use this feature. Changing this setting takes effect when the car is powered off.",
                                             "../assets/offroad/icon_openpilot.png"
                                               ));
   toggles_list->addWidget(new ParamsToggle("LaneChangeEnabled",
@@ -175,7 +175,7 @@ QWidget * developer_panel() {
   // TODO: enable SSH toggle and github keys
 
   Params params = Params();
-  std::string brand = params.read_db_bool("Passive") ? "dashcam" : "openpilot";
+  std::string brand = params.read_db_bool("Passive") ? "dashcam" : "phoenixpilot";
   std::string os_version = util::read_file("/VERSION");
   std::vector<std::pair<std::string, std::string>> labels = {
     {"Version", brand + " v" + params.get("Version", false)},
