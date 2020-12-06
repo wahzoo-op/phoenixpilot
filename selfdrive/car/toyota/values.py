@@ -13,6 +13,7 @@ class SteerLimitParams:
 
 class CAR:
   PRIUS = "TOYOTA PRIUS 2017"
+  PRIUS_2010 = "TOYOTA PRIUS 2010"
   PRIUS_TSS2 = "TOYOTA PRIUS TSS2 2021"
   RAV4H = "TOYOTA RAV4 HYBRID 2017"
   RAV4 = "TOYOTA RAV4 2017"
@@ -857,6 +858,14 @@ FW_VERSIONS = {
       b'8646F4705200\x00\x00\x00\x00',
     ],
   },
+  CAR.PRIUS_2010: {
+    (Ecu.esp, 0x7b0, None): [
+      b'F152647126\x00\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'\x0234715100\x00\x00\x00\x00\x00\x00\x00\x00A4701000\x00\x00\x00\x00\x00\x00\x00\x00',
+    ],
+  },
   CAR.RAV4: {
     (Ecu.engine, 0x7e0, None): [
       b'\x02342Q1000\x00\x00\x00\x00\x00\x00\x00\x0054212000\x00\x00\x00\x00\x00\x00\x00\x00',
@@ -1296,6 +1305,7 @@ DBC = {
   CAR.RAV4H: dbc_dict('toyota_rav4_hybrid_2017_pt_generated', 'toyota_adas'),
   CAR.RAV4: dbc_dict('toyota_rav4_2017_pt_generated', 'toyota_adas'),
   CAR.PRIUS: dbc_dict('toyota_prius_2017_pt_generated', 'toyota_adas'),
+  CAR.PRIUS_2010: dbc_dict('toyota_nodsu_hybrid_pt_generated', 'toyota_adas'),
   CAR.COROLLA: dbc_dict('toyota_corolla_2017_pt_generated', 'toyota_adas'),
   CAR.LEXUS_RX: dbc_dict('lexus_rx_350_2016_pt_generated', 'toyota_adas'),
   CAR.LEXUS_RXH: dbc_dict('lexus_rx_hybrid_2017_pt_generated', 'toyota_adas'),
