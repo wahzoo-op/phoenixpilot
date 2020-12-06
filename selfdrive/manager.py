@@ -449,13 +449,13 @@ def manager_thread():
   cloudlog.info({"environ": os.environ})
 
   # save boot log
-  subprocess.call(["./loggerd", "--bootlog"], cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
+  #subprocess.call(["./loggerd", "--bootlog"], cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
 
   params = Params()
 
   # start daemon processes
-  for p in daemon_processes:
-    start_daemon_process(p)
+  #for p in daemon_processes:
+  #  start_daemon_process(p)
 
   # start persistent processes
   for p in persistent_processes:
@@ -474,7 +474,7 @@ def manager_thread():
       del managed_processes[k]
 
   started_prev = False
-  logger_dead = False
+  logger_dead = True
 
   while 1:
     msg = messaging.recv_sock(thermal_sock, wait=True)
