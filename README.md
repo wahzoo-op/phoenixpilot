@@ -1,5 +1,7 @@
 phoenixpilot
 ========================
+Prometheus was banished by the gods for giving the gift of knowledge to man. He was cast into the bowels of the earth and pecked by birds.
+
 phoenixpilot is a L2 autonomous driving system for Ford vehicles. 
 
 The upstream code base for this repository can be found at https://github.com/commaai/openpilot
