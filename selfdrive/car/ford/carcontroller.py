@@ -54,7 +54,6 @@ class CarController():
         self.lkas_action = 2   # 0-7 accepted. 2 and 4 have action. 
         angle_lim = interp(CS.out.vEgo, ANGLE_MAX_BP, ANGLE_MAX_V)
         apply_steer = clip(apply_steer, -angle_lim, angle_lim)
-        self.lastAngle = apply_steer
         print("LKAS State:", CS.lkas_state, "Current Angle:", CS.out.steeringAngle, "Desired Angle:", apply_steer)
         if enabled:
           if self.lastAngle * apply_steer > 0. and abs(apply_steer) > abs(self.lastAngle):
@@ -65,6 +64,7 @@ class CarController():
           apply_steer = clip(apply_steer, self.lastAngle - angle_rate_lim, self.lastAngle + angle_rate_lim) 
         else:
           apply_steer = CS.out.steeringAngle
+        self.lastAngle = apply_steer
         can_sends.append(create_steer_command(self.packer, apply_steer, enabled, CS.lkas_state, CS.out.steeringAngle, curvature, self.lkas_action))
         self.generic_toggle_last = CS.out.genericToggle
       if (frame % 1) == 0 or (self.enabled_last != enabled) or (self.main_on_last != CS.out.cruiseState.available) or (self.steer_alert_last != steer_alert):
