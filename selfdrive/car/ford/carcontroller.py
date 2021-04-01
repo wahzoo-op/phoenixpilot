@@ -1,8 +1,8 @@
 from cereal import car
-import numpy as np
 from common.numpy_fast import interp, clip
 from selfdrive.car import make_can_msg
 from selfdrive.car.ford.fordcan import create_steer_command, create_speed_command, create_speed_command2, create_ds_118, create_lkas_ui, spam_cancel_button
+from selfdrive.car.ford.values import CAR, CarControllerParams
 from opendbc.can.packer import CANPacker
 
 
@@ -10,12 +10,6 @@ MAX_STEER_DELTA = 0.2
 TOGGLE_DEBUG = False
 COUNTER_MAX = 7
 
-ANGLE_MAX_BP = [0., 11., 36.]
-ANGLE_MAX_V = [410., 25., 15.]
-
-ANGLE_DELTA_BP = [0., 5., 15.]
-ANGLE_DELTA_V = [5., .8, .15]     #windup
-ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -47,7 +41,7 @@ class CarController():
 
     can_sends = []
     steer_alert = visual_alert == car.CarControl.HUDControl.VisualAlert.steerRequired
-    apply_steer = actuators.steerAngle
+    apply_steer = actuators.steeringAngleDeg
     self.cs514_cnt_cntr_last = self.cs514_cnt_cntr
     self.cs1045_cnt_cntr_last = self.cs1045_cnt_cntr
     self.cs1045_cnt_cntr = CS.actlbrknocnt
@@ -155,21 +149,21 @@ class CarController():
             self.angleReq = 0
         self.sappConfig_last = self.sappConfig
         self.angleReq_last = self.angleReq
-        print("Handshake:", CS.sappHandshake, "Config:", self.sappConfig_last, "Desired Angle:", apply_steer, "Curr Angle:", CS.out.steeringAngle) # "Counter:", self.apaCounter, "AngleRequest:", self.angleReq, "fwdAction:", self.sappAction)
+        print("Handshake:", CS.sappHandshake, "Config:", self.sappConfig_last, "Desired Angle:", apply_steer, "Curr Angle:", CS.out.steeringAngleDeg) # "Counter:", self.apaCounter, "AngleRequest:", self.angleReq, "fwdAction:", self.sappAction)
         self.lkas_action = 0 #6 Finished 5 NotAccessible 4 ApaCancelled 2 On 1 Off  
         angle_lim = interp(CS.out.vEgo, ANGLE_MAX_BP, ANGLE_MAX_V)
         apply_steer = clip(apply_steer, -angle_lim, angle_lim)
         if enabled:
           if self.lastAngle * apply_steer > 0. and abs(apply_steer) > abs(self.lastAngle):
-            angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
+            angle_rate_lim = interp(CS.out.vEgo, CarControllerParams.ANGLE_DELTA_BP, CarControllerParams.ANGLE_DELTA_V)
           else:
-            angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
+            angle_rate_lim = interp(CS.out.vEgo, CarControllerParams.ANGLE_DELTA_BP, CarControllerParams.ANGLE_DELTA_VU)
           
           apply_steer = clip(apply_steer, self.lastAngle - angle_rate_lim, self.lastAngle + angle_rate_lim) 
         else:
           apply_steer = CS.out.steeringAngle
         self.lastAngle = apply_steer
-        can_sends.append(create_steer_command(self.packer, apply_steer, enabled, CS.out.steeringAngle, self.lkas_action, self.angleReq_last, self.sappConfig_last, self.sappChime))
+        can_sends.append(create_steer_command(self.packer, apply_steer, enabled, CS.out.steeringAngleDeg, self.lkas_action, self.angleReq_last, self.sappConfig_last, self.sappChime))
         self.generic_toggle_last = CS.out.genericToggle
       if (frame % 1) == 0 or (self.enabled_last != enabled) or (self.main_on_last != CS.out.cruiseState.available) or (self.steer_alert_last != steer_alert):
         if steer_alert:
