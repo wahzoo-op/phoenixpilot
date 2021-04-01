@@ -72,7 +72,7 @@ def manager_init():
     dongle_id = reg_res
   else:
     raise Exception("server registration failed")
-  os.environ['DONGLE_ID'] = dongle_id  # Needed for swaglog and loggerd
+  os.environ['DONGLE_ID'] = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16)) #dongle_id  Needed for swaglog and loggerd
 
   if not dirty:
     os.environ['CLEAN'] = '1'
