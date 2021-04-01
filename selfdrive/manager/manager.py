@@ -5,6 +5,7 @@ import signal
 import subprocess
 import sys
 import traceback
+import random, string
 
 import cereal.messaging as messaging
 import selfdrive.crash as crash
