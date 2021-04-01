@@ -3,7 +3,6 @@ import time
 import json
 
 import jwt
-import random, string
 
 from datetime import datetime, timedelta
 from common.api import api_get
@@ -28,8 +27,8 @@ def register(show_spinner=False):
   params.put("GitRemote", get_git_remote(default=""))
   params.put("SubscriberInfo", HARDWARE.get_subscriber_info())
 
-  IMEI = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
-  HardwareSerial = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+  IMEI = params.get("IMEI", encoding='utf8')
+  HardwareSerial = params.get("HardwareSerial", encoding='utf8')
 
   needs_registration = (None in [IMEI, HardwareSerial])
 
@@ -49,7 +48,7 @@ def register(show_spinner=False):
   os.chmod(PERSIST+'/comma/', 0o755)
   os.chmod(PERSIST+'/comma/id_rsa', 0o744)
 
-  dongle_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+  dongle_id = params.get("DongleId", encoding='utf8')
   needs_registration = needs_registration or dongle_id is None
 
   if needs_registration:
@@ -66,12 +65,12 @@ def register(show_spinner=False):
     imei1, imei2 = None, None
     while imei1 is None and imei2 is None:
       try:
-        imei1, imei2 = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16)), ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+        imei1, imei2 = HARDWARE.get_imei(0), HARDWARE.get_imei(1)
       except Exception:
         cloudlog.exception("Error getting imei, trying again...")
         time.sleep(1)
 
-    serial = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+    serial = HARDWARE.get_serial()
     params.put("IMEI", imei1)
     params.put("HardwareSerial", serial)
 
@@ -81,7 +80,7 @@ def register(show_spinner=False):
         resp = api_get("v2/pilotauth/", method='POST', timeout=15,
                        imei=imei1, imei2=imei2, serial=serial, public_key=public_key, register_token=register_token)
         dongleauth = json.loads(resp.text)
-        dongle_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+        dongle_id = dongleauth["dongle_id"]
         params.put("DongleId", dongle_id)
         break
       except Exception:
