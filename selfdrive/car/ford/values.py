@@ -2,10 +2,11 @@ from selfdrive.car import dbc_dict
 from cereal import car
 Ecu = car.CarParams.Ecu
 
+MAX_ANGLE = 30.  # make sure we never command the extremes (0xfff) which cause latching fault
+  
 class CarControllerParams: 
   ANGLE_MAX_BP = [0., 11., 36.]
   ANGLE_MAX_V = [410., 25., 15.]
-  MAX_ANGLE = 30.  # make sure we never command the extremes (0xfff) which cause latching fault
   ANGLE_DELTA_BP = [0., 5., 15.]
   ANGLE_DELTA_V = [5., .8, .15]     #windup
   ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind

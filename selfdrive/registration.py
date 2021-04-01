@@ -49,7 +49,7 @@ def register(show_spinner=False):
   os.chmod(PERSIST+'/comma/', 0o755)
   os.chmod(PERSIST+'/comma/id_rsa', 0o744)
 
-  dongle_id = params.get("DongleId", encoding='utf8')
+  dongle_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
   needs_registration = needs_registration or dongle_id is None
 
   if needs_registration:
