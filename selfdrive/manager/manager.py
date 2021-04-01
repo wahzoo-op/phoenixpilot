@@ -5,7 +5,6 @@ import signal
 import subprocess
 import sys
 import traceback
-import random, string
 
 import cereal.messaging as messaging
 import selfdrive.crash as crash
@@ -73,7 +72,7 @@ def manager_init():
     dongle_id = reg_res
   else:
     raise Exception("server registration failed")
-  os.environ['DONGLE_ID'] = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16)) #dongle_id  Needed for swaglog and loggerd
+  os.environ['DONGLE_ID'] = dongle_id  # Needed for swaglog and loggerd
 
   if not dirty:
     os.environ['CLEAN'] = '1'
@@ -101,7 +100,7 @@ def manager_thread():
   cloudlog.info({"environ": os.environ})
 
   # save boot log
-  #subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
+  subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
 
   ignore = []
   if os.getenv("NOBOARD") is not None:
