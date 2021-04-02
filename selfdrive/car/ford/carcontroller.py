@@ -151,7 +151,7 @@ class CarController():
         self.angleReq_last = self.angleReq
         print("Handshake:", CS.sappHandshake, "Config:", self.sappConfig_last, "Desired Angle:", apply_steer, "Curr Angle:", CS.out.steeringAngleDeg) # "Counter:", self.apaCounter, "AngleRequest:", self.angleReq, "fwdAction:", self.sappAction)
         self.lkas_action = 0 #6 Finished 5 NotAccessible 4 ApaCancelled 2 On 1 Off  
-        angle_lim = interp(CS.out.vEgo, ANGLE_MAX_BP, ANGLE_MAX_V)
+        angle_lim = interp(CS.out.vEgo, CarControllerParams.ANGLE_MAX_BP, CarControllerParams. ANGLE_MAX_V)
         apply_steer = clip(apply_steer, -angle_lim, angle_lim)
         if enabled:
           if self.lastAngle * apply_steer > 0. and abs(apply_steer) > abs(self.lastAngle):
