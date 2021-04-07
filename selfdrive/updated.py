@@ -40,6 +40,10 @@ from selfdrive.hardware import EON, TICI, HARDWARE
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.alertmanager import set_offroad_alert
 from selfdrive.hardware.tici.agnos import flash_agnos_update
+from common.op_params import opParams
+
+op_params = opParams()
+auto_update = op_params.get('autoUpdate')
 
 LOCK_FILE = os.getenv("UPDATER_LOCK_FILE", "/tmp/safe_staging_overlay.lock")
 STAGING_ROOT = os.getenv("UPDATER_STAGING_ROOT", "/data/safe_staging")
@@ -332,7 +336,7 @@ def fetch_update(wait_helper: WaitTimeHelper) -> bool:
 def main():
   params = Params()
 
-  if params.get("DisableUpdates") == b"1":
+  if params.get("DisableUpdates") == b"1" or auto_update == False:
     raise RuntimeError("updates are disabled by the DisableUpdates param")
 
   if EON and os.geteuid() != 0:

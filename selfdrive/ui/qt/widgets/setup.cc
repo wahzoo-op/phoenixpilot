@@ -192,7 +192,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   QVBoxLayout* qrLayout = new QVBoxLayout;
 
-  qrLayout->addSpacing(40);
+  qrLayout->addSpacing(20);
   QLabel* qrLabel = new QLabel("Scan with comma connect!");
   qrLabel->setWordWrap(true);
   qrLabel->setAlignment(Qt::AlignHCenter);
