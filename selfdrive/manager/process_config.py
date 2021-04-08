@@ -33,14 +33,18 @@ procs = [
   PythonProcess("timezoned", "selfdrive.timezoned", enabled=TICI, persistent=True),
   PythonProcess("tombstoned", "selfdrive.tombstoned", enabled=not PC, persistent=True),
   PythonProcess("updated", "selfdrive.updated", enabled=not PC, persistent=True),
-  if athenaOn:
-    DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
-  if uploadsOn:
-    NativeProcess("proclogd", "selfdrive/proclogd", ["./proclogd"]),
-    NativeProcess("logcatd", "selfdrive/logcatd", ["./logcatd"]),
-    NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"]),
-    PythonProcess("logmessaged", "selfdrive.logmessaged", persistent=True),
-    PythonProcess("uploader", "selfdrive.loggerd.uploader", persistent=True),
 ]
+upload_procs = [
+  NativeProcess("proclogd", "selfdrive/proclogd", ["./proclogd"]),
+  NativeProcess("logcatd", "selfdrive/logcatd", ["./logcatd"]),
+  NativeProcess("loggerd", "selfdrive/loggerd", ["./loggerd"]),
+  PythonProcess("logmessaged", "selfdrive.logmessaged", persistent=True),
+  PythonProcess("uploader", "selfdrive.loggerd.uploader", persistent=True),
+]
+if athenaOn:
+    procs.append(DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"))
+if uploadsOn:
+    procs.append(upload_procs)
+
 
 managed_processes = {p.name: p for p in procs}
