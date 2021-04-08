@@ -3,6 +3,9 @@ import os
 import sys
 import threading
 import capnp
+import requests
+import traceback
+from common.params import Params
 from selfdrive.version import version, dirty, origin, branch
 
 from selfdrive.hardware import PC
@@ -88,6 +91,7 @@ else:
                   install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
 
   def capture_exception(*args, **kwargs):
+    save_exception(traceback.format_exc())
     exc_info = sys.exc_info()
     if not exc_info[0] is capnp.lib.capnp.KjException:
       client.captureException(*args, **kwargs)
