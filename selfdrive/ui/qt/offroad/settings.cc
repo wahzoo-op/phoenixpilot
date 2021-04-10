@@ -15,7 +15,7 @@
 #include "common/params.h"
 #include "common/util.h"
 #include "selfdrive/hardware/hw.h"
-
+#include "common/opParams.hpp"
 
 QWidget * toggles_panel() {
   QVBoxLayout *toggles_list = new QVBoxLayout();
@@ -211,6 +211,57 @@ QWidget * network_panel(QWidget * parent) {
   return w;
 }
 
+QWidget * opParams_panel(QWidget * parent) {
+  QVBoxLayout * opp = new QVBoxLayout;
+  opp->setSpacing(30);
+  
+ 
+  //opp buttons
+  QList<ButtonControl*> opp_btns;
+  
+  opp->addWidget(new opParamControl("cloak",
+                                            "Enable cloak",
+                                            "cloaks your device to Comma's servers. Use at your own risk. Device may get banned. Use of supercloak recommended. Reboot is required. ",
+                                            "../assets/offroad/icon_openpilot.png"
+                                              ));
+  opp->addWidget(horizontal_line());
+  opp->addWidget(new opParamControl("supercloak",
+                                            "Enable supercloak",
+                                            "assigns a random Dongle ID to your device to protect your original one. Use at your own risk. Device may get banned. Use of cloak recommended. Reboot is required. ",
+                                            "../assets/offroad/icon_openpilot.png"
+                                              ));
+  opp->addWidget(horizontal_line());
+  opp->addWidget(new opParamControl("supercloak_reregister",
+                                            "Reregisters for a new Dongle ID",
+                                            "Clears out your old supercloak ID, and gets a new one. Reboot is required. ",
+                                            "../assets/offroad/icon_openpilot.png"
+                                              ));
+  opp->addWidget(horizontal_line());
+  opp->addWidget(new opParamControl("athenaAllowed",
+                                            "Enables Comma Athena",
+                                            "Turns on the Athena Daemon. Used for Comma Prime. Use at your own risk. Device may get banned. cloak recommended. Reboot is required. ",
+                                            "../assets/offroad/icon_openpilot.png"
+                                              ));
+  opp->addWidget(horizontal_line());
+  opp->addWidget(new opParamControl("uploadsAllowed",
+                                            "Enables Comma Uploader",
+                                            "Turns on logging and uploading. Use at your own risk. Device may get banned. Reboot is required. ",
+                                            "../assets/offroad/icon_openpilot.png"
+                                              ));
+  opp->addWidget(horizontal_line());
+  opp->addWidget(new opParamControl("alca_nudge_required",
+                                            "Require a nudge to merge. LIVE!",
+                                            "Toggles whether a nudge is required for Lane Changes. Live Tuneable. Changes take effect immediately. ",
+                                            "../assets/offroad/icon_openpilot.png"
+                                              ));
+  opp->addWidget(horizontal_line());
+  opp_btns.append(new ButtonControl("Press here to read the Ford APA Safety agreement", "Acknowledge",
+                                   "This system utilizes the Active Park system. The angles sent are constrained within safe limits, however you must always pay attention. The handshake will break if you take over steering, and will disengage immediately. You are required to acknowledge this before the system will engage.  For more information, please visit https://github.com/roxasthenobody98/phoenixpilot ", [=]() {
+    if (ConfirmationDialog::confirm("Press OK to acknowledge that you have read the safety agreement.")) {
+      opParams_c().put("apaAcknowledge": True);
+    }
+}
+
 SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
   // setup two main layouts
   QVBoxLayout *sidebar_layout = new QVBoxLayout();
@@ -231,8 +282,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     background-color: #292929;
   )");
   close_btn->setFixedSize(200, 200);
-  sidebar_layout->addSpacing(45);
-  sidebar_layout->addWidget(close_btn, 0, Qt::AlignCenter);
+  sidebar_layout->addSpacing(20);
+  sidebar_layout->addWidget(close_btn, 0, Qt::AlignLeft);
   QObject::connect(close_btn, SIGNAL(released()), this, SIGNAL(closeSettings()));
 
   // setup panels
@@ -243,6 +294,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
     {"Device", device},
     {"Network", network_panel(this)},
     {"Toggles", toggles_panel()},
+	{"opParams", opParams_panel()},
+	//{"Live Tuning", liveTuning_panel()}, to be implemented. 
     {"Developer", new DeveloperPanel()},
   };
 
