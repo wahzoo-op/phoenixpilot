@@ -121,9 +121,9 @@
 #  endif
 #endif
 
-#include <Python.h>
-#include <frameobject.h>
-#include <pythread.h>
+#include "Python.h"
+#include "frameobject.h"
+#include "pythread.h"
 
 /* Python #defines overrides on all sorts of core functions, which
    tends to weak havok in C++ codebases that expect these to work
