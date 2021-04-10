@@ -44,7 +44,7 @@ upload_procs = [
 if athenaOn:
     procs.append(DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"))
 if uploadsOn:
-    procs.append(upload_procs)
+    procs.extend(upload_procs)
 
 
 managed_processes = {p.name: p for p in procs}
