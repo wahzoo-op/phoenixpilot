@@ -113,7 +113,7 @@ class opParams:
     need_id = False
     if "uniqueID" not in self.fork_params:
       need_id = True
-    if "uniqueID" in self.fork_params and self.fork_params["uniqueID"] is None:
+    if "uniqueID" in self.fork_params and self.get('uniqueID') is None:
       need_id = True
     if need_id:
       random_id = ''.join([random.choice(string.ascii_lowercase + string.digits) for i in range(15)])

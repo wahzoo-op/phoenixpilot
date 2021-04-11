@@ -13,8 +13,6 @@ import cereal.messaging as messaging
 from cereal import log
 from common.op_params import opParams
 
-op_params = opParams()
-
 LaneChangeState = log.LateralPlan.LaneChangeState
 LaneChangeDirection = log.LateralPlan.LaneChangeDirection
 
@@ -51,7 +49,9 @@ DESIRES = {
 class LateralPlanner():
   def __init__(self, CP):
     self.LP = LanePlanner()
-
+    
+    op_params = opParams()
+    
     self.last_cloudlog_t = 0
     self.steer_rate_cost = CP.steerRateCost
 
