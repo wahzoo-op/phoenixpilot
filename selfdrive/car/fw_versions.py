@@ -250,19 +250,15 @@ def get_fw_versions(logcan, sendcan, bus, extra=None, timeout=0.1, debug=False, 
 
 if __name__ == "__main__":
   import time
-  import json
   import argparse
   import cereal.messaging as messaging
   from selfdrive.car.vin import get_vin
-  import selfdrive.crash as crash
 
-  parser = argparse.ArgumentParser(description='Get firmware version of ECU\'s')
-  parser.add_argument('--scan', '-s', action='store_true', help='In-depth scan of ECU\'s. May cause module faults')
-  parser.add_argument('--debug', '-d', action='store_true')
-  parser.add_argument('--json', '-j', type=str, nargs=2, metavar=('USERNAME', 'MODEL'), help='Toggles upload of results to a JSON server, Sentry, or both. This helps the fork maintainer. Enter your discord username, and car model. Example: \"./fw_versions.py -j Happy123 COROLLA_TSS2\"')
+  parser = argparse.ArgumentParser(description='Get firmware version of ECUs')
+  parser.add_argument('--scan', action='store_true')
+  parser.add_argument('--debug', action='store_true')
   args = parser.parse_args()
 
-  username, model = args.json
   logcan = messaging.sub_sock('can')
   sendcan = messaging.pub_sock('sendcan')
 
@@ -275,6 +271,7 @@ if __name__ == "__main__":
       extra[(Ecu.unknown, 0x700 + i, None)] = []
       extra[(Ecu.unknown, 0x750, i)] = []
     extra = {"any": {"debug": extra}}
+
   time.sleep(1.)
 
   t = time.time()
@@ -294,13 +291,9 @@ if __name__ == "__main__":
   print("{")
   for version in fw_vers:
     subaddr = None if version.subAddress == 0 else hex(version.subAddress)
-    vers = (f"  (Ecu.{version.ecu}, {hex(version.address)}, {subaddr}): [{version.fwVersion}]")
-    print(vers)
+    print(f"  (Ecu.{version.ecu}, {hex(version.address)}, {subaddr}): [{version.fwVersion}]")
   print("}")
-  if args.json:
-    crash.capture_info('Username is '+username+' . Model is '+model+' .'+vers)
-    
+
   print()
   print("Possible matches:", candidates)
   print("Getting fw took %.3f s" % (time.time() - t))
-  print("Uploaded JSON & Sentry to fork maintainer")
