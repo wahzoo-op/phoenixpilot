@@ -5,6 +5,7 @@ import threading
 import capnp
 import requests
 import traceback
+from cereal import car
 from common.params import Params
 from selfdrive.version import version, dirty, origin, branch
 
@@ -41,6 +42,9 @@ else:
   from common.op_params import opParams
   from datetime import datetime
 
+  ret = car.CarParams.new_message()
+  ret.carFingerprint = candidate
+  
   COMMUNITY_DIR = '/data/community'
   CRASHES_DIR = '{}/crashes'.format(COMMUNITY_DIR)
 
@@ -75,7 +79,7 @@ else:
                 'awareness_factor': awareness_factor, 'alca_min_speed': alca_min_speed,
                 'alca_nudge_required': alca_nudge_required, 'apaAcknowledge': apaAcknowledge,
                 'athenaAllowed': athenaAllowed, 'autoUpdate': autoUpdate, 'camera_offset': camera_offset,
-                'cloak': cloak, 'supercloak': supercloak, 'supercloak_reregister': supercloak_reregister}
+                'cloak': cloak, 'supercloak': supercloak, 'supercloak_reregister': supercloak_reregister, 'fingerprintedAs': candidate}
   if username is None or not isinstance(username, str):
     username = 'undefined'
     error_tags['uniqueID'] = uniqueID
@@ -101,11 +105,11 @@ else:
     client.user_context(kwargs)
 
   def capture_warning(warning_string):
-    bind_user(id=dongle_id, ip_address=ip)
+    bind_user(id=dongle_id, ip_address=ip, username=username, uniqueID=uniqueID)
     client.captureMessage(warning_string, level='warning')
 
   def capture_info(info_string):
-    bind_user(id=dongle_id, ip_address=ip)
+    bind_user(id=dongle_id, ip_address=ip, username=username, uniqueID=uniqueID)
     client.captureMessage(info_string, level='info')
     
   def bind_extra(**kwargs):

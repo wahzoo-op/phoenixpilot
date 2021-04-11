@@ -104,6 +104,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
 	pscmHandshaking @97;
 	pscmHandshaked @98;
     pscmLostHandshake @99;
+	apaNotAcknowledged @100;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;

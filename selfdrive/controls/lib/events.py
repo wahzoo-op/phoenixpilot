@@ -488,7 +488,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.none, AudibleAlert.none, .0, .0, .1),
   },
   EventName.pscmLostHandshake: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("PSCM APA Handshake Lost.")
+    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("PSCM APA Handshake Lost")
   },
   
   # ********** events that affect controls state transitions **********
@@ -497,6 +497,12 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
     ET.ENABLE: EngagementAlert(AudibleAlert.chimeEngage),
   },
 
+  EventName.apaNotAcknowledged: {
+    ET.PERMANENT: NormalPermanentAlert("APA Safety not acknowledged. See Settings to acknowledge"),
+    ET.NO_ENTRY: NoEntryAlert("APA Safety not acknowledged. See Settings to acknowledge",
+                              audible_alert=AudibleAlert.chimeDisengage),
+  },
+  
   EventName.buttonEnable: {
     ET.ENABLE: EngagementAlert(AudibleAlert.chimeEngage),
   },
