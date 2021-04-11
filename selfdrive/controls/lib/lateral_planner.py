@@ -50,7 +50,7 @@ class LateralPlanner():
   def __init__(self, CP):
     self.LP = LanePlanner()
     
-    op_params = opParams()
+    self.op_params = opParams()
     
     self.last_cloudlog_t = 0
     self.steer_rate_cost = CP.steerRateCost
