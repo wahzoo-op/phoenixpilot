@@ -86,6 +86,7 @@ class opParams:
     # Two required parameters for opEdit
     self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
+    self.fork_params["uniqueID"] = Param(None, [type(None), str], 'User\'s unique ID', hidden=True)
     self.params = self._get_all_params(default=True)  # in case file is corrupted
 
     if travis:
@@ -116,7 +117,6 @@ class opParams:
       need_id = True
     if need_id:
       random_id = ''.join([random.choice(string.ascii_lowercase + string.digits) for i in range(15)])
-      self.fork_params["uniqueID"] = Param(None, [type(None), str], 'User\'s unique ID')
       self.put('uniqueID', random_id)
       
   def get(self, key=None, force_live=False):  # key=None is dict of all params
