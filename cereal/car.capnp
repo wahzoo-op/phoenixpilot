@@ -196,6 +196,9 @@ struct CarState {
   pscmHandshaked @38 :Bool; #APA handshake success
   pscmLostHandshake @39 :Bool; #APA Lost handshake
   
+  #apa not ack
+  apaNotAcknowledged @41 :Bool;
+  
   engineRPM @40 :Float32;
 
   struct WheelSpeeds {

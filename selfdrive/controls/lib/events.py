@@ -498,7 +498,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.apaNotAcknowledged: {
-    ET.PERMANENT: NormalPermanentAlert("APA Safety not acknowledged. See Settings to acknowledge"),
+    ET.PERMANENT: NormalPermanentAlert("APA Safety not acknowledged", "See Settings to acknowledge"),
     ET.NO_ENTRY: NoEntryAlert("APA Safety not acknowledged. See Settings to acknowledge",
                               audible_alert=AudibleAlert.chimeDisengage),
   },

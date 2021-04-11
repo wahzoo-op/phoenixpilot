@@ -43,7 +43,7 @@ else:
   from datetime import datetime
 
   ret = car.CarParams.new_message()
-  ret.carFingerprint = candidate
+  candidate = ret.carFingerprint
   
   COMMUNITY_DIR = '/data/community'
   CRASHES_DIR = '{}/crashes'.format(COMMUNITY_DIR)

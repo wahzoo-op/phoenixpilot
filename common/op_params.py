@@ -73,7 +73,6 @@ class opParams:
                         'supercloak_reregister': Param(False, bool, "dump your supercloak Dongle ID if it gets banned"),
                         'uploadsAllowed': Param(False, bool, "Allow uploads to Comma. Not recommended. If you are not cloaked and supercloaked, you risk your device being banned."),
                         #'use_car_caching': Param(True, bool, 'Whether to use fingerprint caching'),
-                        'uniqueID': Param(None, [type(None), str], 'User\'s unique ID')
                         }
 
     self._params_file = '/data/op_params.json'
@@ -108,7 +107,17 @@ class opParams:
     if to_write:
       self._write()
       os.chmod(self._params_file, 0o764)
-
+      
+  def create_id(self):  # creates unique identifier to send with sentry errors. please update uniqueID with op_edit.py to your username!
+    need_id = False
+    if "uniqueID" not in self.fork_params:
+      need_id = True
+    if "uniqueID" in self.fork_params and self.fork_params["uniqueID"] is None:
+      need_id = True
+    if need_id:
+      random_id = ''.join([random.choice(string.ascii_lowercase + string.digits) for i in range(15)])
+      self.fork_params["uniqueID"] = random_id
+      
   def get(self, key=None, force_live=False):  # key=None is dict of all params
     if key is None:
       return self._get_all_params(to_update=force_live)
