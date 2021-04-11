@@ -116,7 +116,8 @@ class opParams:
       need_id = True
     if need_id:
       random_id = ''.join([random.choice(string.ascii_lowercase + string.digits) for i in range(15)])
-      self.fork_params["uniqueID"] = random_id
+      self.fork_params["uniqueID"] = Param(None, [type(None), str], 'User\'s unique ID')
+      self.put('uniqueID', random_id)
       
   def get(self, key=None, force_live=False):  # key=None is dict of all params
     if key is None:
