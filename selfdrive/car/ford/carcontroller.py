@@ -38,9 +38,6 @@ class CarController():
     can_sends = []
     steer_alert = visual_alert == car.CarControl.HUDControl.VisualAlert.steerRequired
     apply_steer = actuators.steeringAngleDeg
-    self.cs514_cnt_cntr_last = self.cs514_cnt_cntr
-    self.cs1045_cnt_cntr_last = self.cs1045_cnt_cntr
-    self.cs1045_cnt_cntr = CS.actlbrknocnt
     if self.enable_camera:
       if CS.epsAssistLimited:
         print("PSCM Assist Limited")
