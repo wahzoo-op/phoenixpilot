@@ -48,8 +48,8 @@ class CarController():
           self.speed = 0
           self.drvstate = 6
           can_sends.append(create_ds_118(self.packer,  CS.filler1, CS.filler2, CS.filler3, CS.brakectr, CS.awdlckmax, CS.awdlckmn, self.drvstate, CS.drvtq, CS.emergbrk, CS.stoplmp, CS.angle))
-          can_sends.append(create_speed_command(self.packer, enabled, self.speed, CS.trlraid, self.actlnocs, CS.actlnocnt, CS.actlqf, CS.epsgear))
-          can_sends.append(create_speed_command2(self.packer, enabled, self.speed, CS.lsmcdecel, self.actlbrknocs, CS.actlbrknocnt, CS.actlbrkqf, CS.brkfld, CS.stab_stat))
+          can_sends.append(create_speed_command(self.packer, enabled, self.speed, CS.trlraid, self.actlnocs, CS.actlnocnt, CS.actlqf, CS.epsgear, frame_step))
+          can_sends.append(create_speed_command2(self.packer, enabled, self.speed, CS.lsmcdecel, self.actlbrknocs, CS.actlbrknocnt, CS.actlbrkqf, CS.brkfld, CS.stab_stat, frame_step))
         else:
           can_sends.append(create_ds_118(self.packer,  CS.filler1, CS.filler2, CS.filler3, CS.brakectr, CS.awdlckmax, CS.awdlckmn, CS.drvstate, CS.drvtq, CS.emergbrk, CS.stoplmp, CS.angle))
           can_sends.append(create_speed_command(self.packer, CS.vehSpeed, CS.trlraid, CS.actlnocs, CS.actlnocnt, CS.actlqf, CS.epsgear))
