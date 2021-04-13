@@ -121,7 +121,7 @@ class CarController():
       if (frame % 1) == 0 or (self.enabled_last != enabled) or (self.main_on_last != CS.out.cruiseState.available) or (self.steer_alert_last != steer_alert):
         if steer_alert:
           self.steer_chime = 1
-          self.daschime = 0
+          self.daschime = 2
         else:
           self.steer_chime = 0
           self.daschime = 0

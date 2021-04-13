@@ -144,7 +144,7 @@ class CarState(CarStateBase):
       ("GearRvrse_D_Actl", "EngVehicleSpThrottle2", 0.),
       ("VehVActlEng_No_Cnt", "EngVehicleSpThrottle2", 0.),
       ("VehStab_D_Stat", "EngVehicleSpThrottle2", 0.),
-      ("BrkFluidLvl_D_Stat", "EngVehicleSpThrottle2", 0.)
+      ("BrkFluidLvl_D_Stat", "EngVehicleSpThrottle2", 0.),
       ("Veh_V_ActlBrk", "BrakeSysFeatures", 0.),
       ("LsmcBrkDecel_D_Stat", "BrakeSysFeatures", 0.),
       ("VehVActlBrk_No_Cs", "BrakeSysFeatures", 0.),
