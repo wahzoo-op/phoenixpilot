@@ -86,6 +86,8 @@ class CarState(CarStateBase):
     self.actlnocnt = cp.vl["EngVehicleSpThrottle2"]['VehVActlEng_No_Cnt']
     self.actlqf = cp.vl["EngVehicleSpThrottle2"]['VehVActlEng_D_Qf']
     self.epsgear = cp.vl["EngVehicleSpThrottle2"]['GearRvrse_D_Actl']
+    self.stab_stat = cp.vl["EngVehicleSpThrottle2"]['VehStab_D_Stat']
+    self.brkfld = cp.vl["EngVehicleSpThrottle2"]['BrkFluidLvl_D_Stat']
     self.lsmcdecel = cp.vl["BrakeSysFeatures"]['LsmcBrkDecel_D_Stat']
     self.actlbrknocs = cp.vl["BrakeSysFeatures"]['VehVActlBrk_No_Cs']
     self.actlbrknocnt = cp.vl["BrakeSysFeatures"]['VehVActlBrk_No_Cnt']
@@ -141,6 +143,8 @@ class CarState(CarStateBase):
       ("VehVActlEng_D_Qf", "EngVehicleSpThrottle2", 0.),
       ("GearRvrse_D_Actl", "EngVehicleSpThrottle2", 0.),
       ("VehVActlEng_No_Cnt", "EngVehicleSpThrottle2", 0.),
+      ("VehStab_D_Stat", "EngVehicleSpThrottle2", 0.),
+      ("BrkFluidLvl_D_Stat", "EngVehicleSpThrottle2", 0.)
       ("Veh_V_ActlBrk", "BrakeSysFeatures", 0.),
       ("LsmcBrkDecel_D_Stat", "BrakeSysFeatures", 0.),
       ("VehVActlBrk_No_Cs", "BrakeSysFeatures", 0.),
