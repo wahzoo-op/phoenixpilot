@@ -34,10 +34,10 @@ def create_ds_118(packer, filler1, filler2, filler3, brakectr, awdlckmax, awdlck
 def create_speed_command(packer, enabled, frame, speed, trlraid, actlnocs, actlnocnt, actlqf, gear, frame_step):
   """Creates a CAN message for the Ford Speed Command."""
   #Checksum is similar to mazda. Start with 249, then subtract the messages per line, then add 10. Bitwise shifting will be needed in order to specify a speed, otherwise if it is 0, then no action is needed. 
-  csum_a = 249 - gear - trlraid - actlnocnt - actlqf -  speed
+  cnt = frame/frame_step % 16 #message only sends odd numbered counters for some weird reason. this might work. not in sync with 1045. 
+  csum_a = 249 - gear - trlraid - cnt - actlqf -  speed
   csum_a = csum_a + 10
   cksum_a = csum_a
-  cnt = frame/frame_step % 16 #message only sends odd numbered counters for some weird reason. this might work. not in sync with 1045. 
   #if enabled:
   #  cksum_a = csum_a
   #  cnt = frame/frame_step % 16
@@ -58,10 +58,10 @@ def create_speed_command(packer, enabled, frame, speed, trlraid, actlnocs, actln
 def create_speed_command2(packer, enabled, frame, speed2, lsmcdecel, actlbrknocs, actlbrknocnt, actlbrkqf, brklvl, vehstab, frame_step):
   """Creates a CAN message for the Ford Speed Command."""
   #Checksum is similar to mazda. Start with 249, then subtract the messages per line, then add 10. Bitwise shifting will be needed in order to specify a speed, otherwise if it is 0, then no action is needed. 
-  csum_b = 249 - speed2 - actlbrkqf - actlbrknocnt - brklvl - lsmcdecel - vehstab
+  cnt2 = frame/frame_step % 16
+  csum_b = 249 - speed2 - actlbrkqf - cnt2 - brklvl - lsmcdecel - vehstab
   csum_b = csum_b + 10
   cksum_b = csum_b
-  cnt2 = frame/frame_step % 16
   print("cnt2:", cnt2)
   #if enabled:
   #  cksum_a = csum_a
