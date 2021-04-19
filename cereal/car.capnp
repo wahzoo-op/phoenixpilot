@@ -101,10 +101,10 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     gpsMalfunction @94;
     processNotRunning @95;
     dashcamMode @96;
-	pscmHandshaking @97;
-	pscmHandshaked @98;
+    pscmHandshaking @97;
+    pscmHandshaked @98;
     pscmLostHandshake @99;
-	apaNotAcknowledged @100;
+    apaNotAcknowledged @100;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
@@ -509,6 +509,7 @@ struct CarParams {
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
     hyundaiCommunity @24;
+    fordCommunity @25;
   }
 
   enum SteerControlType {
