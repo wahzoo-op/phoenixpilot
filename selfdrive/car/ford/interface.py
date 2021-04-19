@@ -22,7 +22,11 @@ class CarInterface(CarInterfaceBase):
     ret = CarInterfaceBase.get_std_params(candidate, fingerprint)
     ret.carName = "ford"
     ret.communityFeature = True                              
-    ret.safetyModel = car.CarParams.SafetyModel.ford
+    self.apa = True
+    if self.apa:
+      ret.safetyModel = car.CarParams.SafetyModel.ford_community
+    else:
+      ret.safetyModel = car.CarParams.SafetyModel.ford
     ret.dashcamOnly = False
     
     if candidate in [CAR.F150, CAR.F150SG]:
