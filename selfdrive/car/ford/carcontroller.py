@@ -9,19 +9,6 @@ from common.op_params import opParams
 op_params = opParams()
 enable_angle_live = op_params.get('enable_angle_live')
 
-if enable_angle_live:
-  ANGLE_MAX_BP = op_params.get('angle_max_bp')
-  ANGLE_MAX_V = op_params.get('angle_max_v')
-  ANGLE_DELTA_BP = op_params.get('angle_delta_bp')
-  ANGLE_DELTA_V = op_params.get('angle_delta_v')
-  ANGLE_DELTA_VU = op_params.get('angle_delta_vu')
-else:
-  ANGLE_MAX_BP = [0., 11., 36.]
-  ANGLE_MAX_V = [410., 25., 15.]
-  ANGLE_DELTA_BP = [0., 5., 15.]
-  ANGLE_DELTA_V = [5., .8, .15]     #windup
-  ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind
-
 MAX_STEER_DELTA = 0.2
 TOGGLE_DEBUG = False
 COUNTER_MAX = 7
@@ -51,7 +38,19 @@ class CarController():
   def update(self, enabled, CS, frame, actuators, visual_alert, pcm_cancel):
   
     frame_step = CarControllerParams.FRAME_STEP
-    
+    if enable_angle_live:
+      ANGLE_MAX_BP = op_params.get('angle_max_bp')
+      ANGLE_MAX_V = op_params.get('angle_max_v')
+      ANGLE_DELTA_BP = op_params.get('angle_delta_bp')
+      ANGLE_DELTA_V = op_params.get('angle_delta_v')
+      ANGLE_DELTA_VU = op_params.get('angle_delta_vu')
+    else:
+      ANGLE_MAX_BP = [0., 11., 36.]
+      ANGLE_MAX_V = [410., 25., 15.]
+      ANGLE_DELTA_BP = [0., 5., 15.]
+      ANGLE_DELTA_V = [5., .8, .15]     #windup
+      ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind
+
     can_sends = []
     steer_alert = visual_alert == car.CarControl.HUDControl.VisualAlert.steerRequired
     apply_steer = actuators.steeringAngleDeg
@@ -125,7 +124,7 @@ class CarController():
             angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
           else:
             angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
-          
+          print("max_bp:", ANGLE_MAX_BP, "max_v:", ANGLE_MAX_V, "delta_bp:", ANGLE_DELTA_BP, "delta_v:", ANGLE_DELTA_V, "delta_vu:", ANGLE_DELTA_VU)
           apply_steer = clip(apply_steer, self.lastAngle - angle_rate_lim, self.lastAngle + angle_rate_lim) 
         else:
           apply_steer = CS.out.steeringAngleDeg
