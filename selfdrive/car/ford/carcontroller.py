@@ -4,6 +4,23 @@ from selfdrive.car import make_can_msg
 from selfdrive.car.ford.fordcan import create_steer_command, create_speed_command, create_speed_command2, create_ds_118, create_lkas_ui, spam_cancel_button
 from selfdrive.car.ford.values import CAR, CarControllerParams
 from opendbc.can.packer import CANPacker
+from common.op_params import opParams
+
+op_params = opParams()
+enable_angle_live = op_params.get('enable_angle_live')
+
+if enable_angle_live:
+  ANGLE_MAX_BP = op_params.get('angle_max_bp')
+  ANGLE_MAX_V = op_params.get('angle_max_v')
+  ANGLE_DELTA_BP = op_params.get('angle_delta_bp')
+  ANGLE_DELTA_V = op_params.get('angle_delta_v')
+  ANGLE_DELTA_VU = op_params.get('angle_delta_vu')
+else:
+  ANGLE_MAX_BP = [0., 11., 36.]
+  ANGLE_MAX_V = [410., 25., 15.]
+  ANGLE_DELTA_BP = [0., 5., 15.]
+  ANGLE_DELTA_V = [5., .8, .15]     #windup
+  ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind
 
 MAX_STEER_DELTA = 0.2
 TOGGLE_DEBUG = False
@@ -101,13 +118,13 @@ class CarController():
         self.angleReq_last = self.angleReq
         print("Handshake:", CS.sappHandshake, "Config:", self.sappConfig_last, "Desired Angle:", apply_steer, "Curr Angle:", CS.out.steeringAngleDeg) # "Counter:", self.apaCounter, "AngleRequest:", self.angleReq, "fwdAction:", self.sappAction)
         self.lkas_action = 0 #6 Finished 5 NotAccessible 4 ApaCancelled 2 On 1 Off  
-        angle_lim = interp(CS.out.vEgo, CarControllerParams.ANGLE_MAX_BP, CarControllerParams.ANGLE_MAX_V)
+        angle_lim = interp(CS.out.vEgo, ANGLE_MAX_BP, ANGLE_MAX_V)
         apply_steer = clip(apply_steer, -angle_lim, angle_lim)
         if enabled:
           if self.lastAngle * apply_steer > 0. and abs(apply_steer) > abs(self.lastAngle):
-            angle_rate_lim = interp(CS.out.vEgo, CarControllerParams.ANGLE_DELTA_BP, CarControllerParams.ANGLE_DELTA_V)
+            angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_V)
           else:
-            angle_rate_lim = interp(CS.out.vEgo, CarControllerParams.ANGLE_DELTA_BP, CarControllerParams.ANGLE_DELTA_VU)
+            angle_rate_lim = interp(CS.out.vEgo, ANGLE_DELTA_BP, ANGLE_DELTA_VU)
           
           apply_steer = clip(apply_steer, self.lastAngle - angle_rate_lim, self.lastAngle + angle_rate_lim) 
         else:
