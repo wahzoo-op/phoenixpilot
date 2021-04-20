@@ -69,10 +69,16 @@ class opParams:
                         'autoUpdate': Param(True, bool, 'Whether to auto-update'),
                         'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True),
                         'cloak': Param(False, bool, "make comma believe you are on their fork"),
-                        'supercloak': Param(False, bool, "give comma a fake dongle ID, sparing your old one. Still carries a risk of your device being banned."),
-                        'supercloak_reregister': Param(False, bool, "dump your supercloak Dongle ID if it gets banned"),
+                        'supercloak': Param(False, bool, "give comma a fake dongle ID, sparing your old one. Still carries a risk of your device being banned.", depends_on='cloak'),
+                        'supercloak_reregister': Param(False, bool, "dump your supercloak Dongle ID if it gets banned", depends_on='supercloak'),
                         'uploadsAllowed': Param(False, bool, "Allow uploads to Comma. Not recommended. If you are not cloaked and supercloaked, you risk your device being banned."),
                         #'use_car_caching': Param(True, bool, 'Whether to use fingerprint caching'),
+                        'enable_angle_live': Param(False, bool, live=True),
+                        'angle_max_bp': Param([0., 11., 36.], [list, float, int], live=True, depends_on='enable_angle_live'),
+                        'angle_max_v': Param([410., 25., 15.], [list, float, int], live=True, depends_on='enable_angle_live'),
+                        'angle_delta_bp': Param([0., 5., 15.], [list, float, int], live=True, depends_on='enable_angle_live'),
+                        'angle_delta_v': Param([5., .8, .15], [list, float, int], live=True, depends_on='enable_angle_live'),
+                        'angle_delta_vu': Param([5., 3.5, 0.4], [list, float, int], live=True, depends_on='enable_angle_live'),
                         }
 
     self._params_file = '/data/op_params.json'
