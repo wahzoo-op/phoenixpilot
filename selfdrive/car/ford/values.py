@@ -1,26 +1,15 @@
 from selfdrive.car import dbc_dict
 from cereal import car
-from common.op_params import opParams
-
-op_params = opParams()
-enable_angle_live = op_params.get('enable_angle_live')
 Ecu = car.CarParams.Ecu
 
 MAX_ANGLE = 30.  # make sure we never command the extremes (0xfff) which cause latching fault
   
-class CarControllerParams:
-  if enable_angle_live:
-    ANGLE_MAX_BP = op_params.get('angle_max_bp')
-    ANGLE_MAX_V = op_params.get('angle_max_v')
-    ANGLE_DELTA_BP = op_params.get('angle_delta_bp')
-    ANGLE_DELTA_V = op_params.get('angle_delta_v')
-    ANGLE_DELTA_VU = op_params.get('angle_delta_vu')
-  else:
-    ANGLE_MAX_BP = [0., 11., 36.]
-    ANGLE_MAX_V = [410., 25., 15.]
-    ANGLE_DELTA_BP = [0., 5., 15.]
-    ANGLE_DELTA_V = [5., .8, .15]     #windup
-    ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind
+class CarControllerParams: 
+  ANGLE_MAX_BP = [0., 11., 36.]
+  ANGLE_MAX_V = [410., 25., 15.]
+  ANGLE_DELTA_BP = [0., 5., 15.]
+  ANGLE_DELTA_V = [5., .8, .15]     #windup
+  ANGLE_DELTA_VU = [5., 3.5, 0.4] #unwind
   FRAME_STEP = 2
   
 class CAR:
