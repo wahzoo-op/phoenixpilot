@@ -24,8 +24,6 @@ class Param:
     if not isinstance(allowed_types, list):
       allowed_types = [allowed_types]
     self.allowed_types = allowed_types
-    self.depends_on = depends_on
-    self.children = []
     self.description = description
     self.hidden = hidden
     self.live = live
@@ -34,25 +32,16 @@ class Param:
   def is_valid(self, value):
     if not self.has_allowed_types:  # always valid if no allowed types, otherwise checks to make sure
       return True
-    if self.is_list and isinstance(value, list):
-      for v in value:
-        if type(v) not in self.allowed_types:
-          return False
-      return True
-    else:
-      return type(value) in self.allowed_types or value in self.allowed_types
+    return type(value) in self.allowed_types
 
   def _create_attrs(self):  # Create attributes and check Param is valid
     self.has_allowed_types = isinstance(self.allowed_types, list) and len(self.allowed_types) > 0
     self.has_description = self.description is not None
     self.is_list = list in self.allowed_types
-    self.is_bool = bool in self.allowed_types
     if self.has_allowed_types:
-      assert type(self.default) in self.allowed_types or self.default in self.allowed_types, 'Default value type must be in specified allowed_types!'
-
-      if self.is_list and self.default:
-        for v in self.default:
-          assert type(v) in self.allowed_types, 'Default value type must be in specified allowed_types!'
+      assert type(self.default) in self.allowed_types, 'Default value type must be in specified allowed_types!'
+    if self.is_list:
+      self.allowed_types.remove(list)
 
 
 class opParams:
@@ -95,7 +84,6 @@ class opParams:
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
     self._last_read_time = sec_since_boot()
-    self._last_mod_time = 0.
     self.read_frequency = 3  # max frequency to read with self.get(...) (sec)
     self._to_delete = []  # a list of unused params you want to delete
     self._run_init()  # restores, reads, and updates params
@@ -106,15 +94,6 @@ class opParams:
     self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
     self.fork_params["uniqueID"] = Param(None, [type(None), str], 'User\'s unique ID', hidden=True)
     self.params = self._get_all_params(default=True)  # in case file is corrupted
-
-    
-    for k, p in self.fork_params.items():
-      d = p.depends_on
-      while d:
-        fp = self.fork_params[d]
-        fp.children.append(k)
-        d = fp.depends_on
-
 
     if travis:
       return
@@ -211,19 +190,13 @@ class opParams:
     return self.get(s)
 
   def _read(self):
-    if os.path.isfile(self._params_file):
-      try:
-        mod_time = os.path.getmtime(self._params_file)
-        if mod_time > self._last_mod_time:
-          with open(self._params_file, "r") as f:
-            self.params = json.loads(f.read())
-          self._last_mod_time = mod_time
-          return True
-        else:
-          return False
-      except Exception as e:
-        print("Unable to read file: " + str(e))
-        return False
+    try:
+      with open(self._params_file, "r") as f:
+        self.params = json.loads(f.read())
+      return True
+    except Exception as e:
+      error(e)
+      return False
 
   def _write(self):
     if not travis:
