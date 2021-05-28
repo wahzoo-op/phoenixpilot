@@ -129,6 +129,27 @@ FW_VERSIONS = {
     (Ecu.srs, 0x737, None): [
       b'GR3T-14C028-AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
     ],
+  }, 
+  CAR.TRANSIT: {
+    (Ecu.fwdCamera, 0x706, None): [
+      b'FL3T-14G019-DE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+    ],
+    (Ecu.eps, 0x730, None): [
+      b'GL34-14D003-AD\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+      b'GL34-14D003-AE\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    ],
+    (Ecu.esp, 0x760, None): [
+      b'FL34-2D053-BA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    ],
+    (Ecu.fwdRadar, 0x764, None): [
+      b'FL3T-14D049-AF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    ],
+    (Ecu.engine, 0x7e0, None): [
+      b'FL3A-14C204-ABL\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    ],
+    (Ecu.srs, 0x737, None): [
+      b'GR3T-14C028-AA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+    ],
   }
 }
 #FEATURES = {
@@ -149,7 +170,7 @@ SPEED_FACTOR = {
   #CAR.TAURUS:
   #CAR.FLEX: 
   #CAR.FOCUS: 
-  #CAR.TRANSIT: 
+  CAR.TRANSIT: 1.,
   #CAR.AVIATOR: 
   #CAR.CONTINENTAL: 
   #CAR.CORSAIR: 
@@ -177,7 +198,7 @@ DBC = {
   #CAR.TAURUS: dbc_dict('placeholder', 'placeholder'),
   #CAR.FLEX: dbc_dict('placeholder', 'placeholder'),
   #CAR.FOCUS: dbc_dict('placeholder', 'placeholder'),
-  #CAR.TRANSIT: dbc_dict('placeholder', 'placeholder'),
+  CAR.TRANSIT: dbc_dict('ford_lincoln_base_pt', None),
   #Lincoln
   #CAR.AVIATOR: dbc_dict('placeholder', 'placeholder'),
   #CAR.CONTINENTAL: dbc_dict('placeholder', 'placeholder'),
