@@ -127,6 +127,12 @@ Device::Device(QObject *parent) : brightness_filter(BACKLIGHT_OFFROAD, BACKLIGHT
   setAwake(true);
   resetInteractiveTimeout();
 
+  // Restore saved brightness setting
+  const int presets[] = {-1, 25, 50, 75, 100};
+  std::string val = Params().get("ScreenBrightness");
+  int idx = val.empty() ? 0 : std::stoi(val);
+  if (idx >= 0 && idx < 5) brightness_override = presets[idx];
+
   QObject::connect(uiState(), &UIState::uiUpdate, this, &Device::update);
 }
 
@@ -152,19 +158,24 @@ void Device::resetInteractiveTimeout(int timeout) {
 }
 
 void Device::updateBrightness(const UIState &s) {
-  float clipped_brightness = offroad_brightness;
-  if (s.scene.started && s.scene.light_sensor >= 0) {
-    clipped_brightness = s.scene.light_sensor;
+  float clipped_brightness;
+  if (brightness_override >= 0) {
+    clipped_brightness = brightness_override;
+  } else {
+    clipped_brightness = offroad_brightness;
+    if (s.scene.started && s.scene.light_sensor >= 0) {
+      clipped_brightness = s.scene.light_sensor;
 
-    // CIE 1931 - https://www.photonstophotos.net/GeneralTopics/Exposure/Psychometric_Lightness_and_Gamma.htm
-    if (clipped_brightness <= 8) {
-      clipped_brightness = (clipped_brightness / 903.3);
-    } else {
-      clipped_brightness = std::pow((clipped_brightness + 16.0) / 116.0, 3.0);
+      // CIE 1931 - https://www.photonstophotos.net/GeneralTopics/Exposure/Psychometric_Lightness_and_Gamma.htm
+      if (clipped_brightness <= 8) {
+        clipped_brightness = (clipped_brightness / 903.3);
+      } else {
+        clipped_brightness = std::pow((clipped_brightness + 16.0) / 116.0, 3.0);
+      }
+
+      // Scale back to 10% to 100%
+      clipped_brightness = std::clamp(100.0f * clipped_brightness, 10.0f, 100.0f);
     }
-
-    // Scale back to 10% to 100%
-    clipped_brightness = std::clamp(100.0f * clipped_brightness, 10.0f, 100.0f);
   }
 
   int brightness = brightness_filter.update(clipped_brightness);

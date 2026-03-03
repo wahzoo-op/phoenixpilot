@@ -208,6 +208,44 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
   addItem(new LabelControl(tr("Dongle ID"), getDongleId().value_or(tr("N/A"))));
   addItem(new LabelControl(tr("Serial"), params.get("HardwareSerial").c_str()));
 
+  // Screen brightness control
+  {
+    auto *brightnessFrame = new QFrame(this);
+    brightnessFrame->setFixedHeight(120);
+    auto *hLayout = new QHBoxLayout(brightnessFrame);
+    hLayout->setContentsMargins(20, 0, 20, 0);
+
+    auto *titleLabel = new QLabel(tr("Screen Brightness"), brightnessFrame);
+    titleLabel->setStyleSheet("font-size: 50px; color: white;");
+    hLayout->addWidget(titleLabel);
+    hLayout->addStretch();
+
+    QStringList labels = {"Auto", "25%", "50%", "75%", "100%"};
+    int savedIdx = QString(params.get("ScreenBrightness").c_str()).toInt();
+
+    auto *btnGroup = new QButtonGroup(brightnessFrame);
+    btnGroup->setExclusive(true);
+    for (int i = 0; i < labels.size(); i++) {
+      auto *btn = new QPushButton(labels[i], brightnessFrame);
+      btn->setCheckable(true);
+      btn->setChecked(i == savedIdx);
+      btn->setFixedSize(130, 80);
+      btn->setStyleSheet(R"(
+        QPushButton { border-radius: 40px; font-size: 35px; font-weight: 500; background-color: #393939; color: #e4e4e4; }
+        QPushButton:checked { background-color: #33ab4c; }
+        QPushButton:pressed { background-color: #4a4a4a; }
+      )");
+      btnGroup->addButton(btn, i);
+      hLayout->addWidget(btn);
+    }
+    const int brightness_values[] = {-1, 25, 50, 75, 100};
+    QObject::connect(btnGroup, QOverload<int>::of(&QButtonGroup::buttonClicked), [=](int idx) {
+      params.put("ScreenBrightness", std::to_string(idx));
+      if (idx >= 0 && idx < 5) device()->setBrightnessOverride(brightness_values[idx]);
+    });
+    addItem(brightnessFrame);
+  }
+
   pair_device = new ButtonControl(tr("Pair Device"), tr("PAIR"),
                                   tr("Pair your device with comma connect (connect.comma.ai) and claim your comma prime offer."));
   connect(pair_device, &ButtonControl::clicked, [=]() {

@@ -112,6 +112,7 @@ private:
 
   int offroad_brightness = BACKLIGHT_OFFROAD;
   int last_brightness = 0;
+  int brightness_override = -1;  // -1 = auto, 0-100 = fixed percentage
   FirstOrderFilter brightness_filter;
   QFuture<void> brightness_future;
 
@@ -126,6 +127,7 @@ signals:
 public slots:
   void resetInteractiveTimeout(int timeout = -1);
   void update(const UIState &s);
+  void setBrightnessOverride(int value) { brightness_override = value; }
 };
 
 Device *device();
