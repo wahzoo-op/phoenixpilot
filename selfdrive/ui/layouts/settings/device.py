@@ -2,7 +2,7 @@ import os
 import json
 
 from openpilot.common.basedir import BASEDIR
-from openpilot.common.params import Params
+from openpilot.common.params import Params, UnknownKeyName
 from openpilot.selfdrive.ui.onroad.driver_camera_dialog import DriverCameraDialog
 from openpilot.selfdrive.ui.ui_state import ui_state, device, BRIGHTNESS_PRESETS
 from openpilot.selfdrive.ui.widgets.pairing_dialog import PairingDialog
@@ -44,7 +44,10 @@ class DeviceLayout(Widget):
     dongle_id = self._params.get("DongleId") or "N/A"
     serial = self._params.get("HardwareSerial") or "N/A"
 
-    brightness_idx = int(self._params.get("ScreenBrightness") or "0")
+    try:
+      brightness_idx = int(self._params.get("ScreenBrightness") or "0")
+    except (ValueError, UnknownKeyName):
+      brightness_idx = 0
 
     items = [
       text_item("Dongle ID", dongle_id),
@@ -153,7 +156,10 @@ class DeviceLayout(Widget):
     )
 
   def _on_brightness_change(self, index: int):
-    self._params.put("ScreenBrightness", str(index))
+    try:
+      self._params.put("ScreenBrightness", str(index))
+    except UnknownKeyName:
+      pass
     device.set_brightness_override(BRIGHTNESS_PRESETS.get(index, -1))
 
   def _on_review_training_guide(self): pass
