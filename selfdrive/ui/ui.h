@@ -127,7 +127,7 @@ signals:
 public slots:
   void resetInteractiveTimeout(int timeout = -1);
   void update(const UIState &s);
-  void setBrightnessOverride(int value) { brightness_override = value; }
+  void setBrightnessOverride(int value) { brightness_override = value; if (value >= 0) brightness_filter.reset(value); }
 };
 
 Device *device();
