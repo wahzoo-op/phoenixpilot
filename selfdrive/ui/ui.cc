@@ -128,10 +128,10 @@ Device::Device(QObject *parent) : brightness_filter(BACKLIGHT_OFFROAD, BACKLIGHT
   resetInteractiveTimeout();
 
   // Restore saved brightness setting
-  const int presets[] = {-1, 25, 50, 75, 100};
+  const int presets[] = {-1, 5, 25, 50, 75, 100};
   std::string val = Params().get("ScreenBrightness");
   int idx = val.empty() ? 0 : std::stoi(val);
-  if (idx >= 0 && idx < 5) brightness_override = presets[idx];
+  if (idx >= 0 && idx < 6) brightness_override = presets[idx];
 
   QObject::connect(uiState(), &UIState::uiUpdate, this, &Device::update);
 }

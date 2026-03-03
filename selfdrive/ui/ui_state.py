@@ -144,7 +144,7 @@ class UIState:
       self.is_metric = False
 
 
-BRIGHTNESS_PRESETS = {0: -1, 1: 25, 2: 50, 3: 75, 4: 100}  # index -> percent, -1 = auto
+BRIGHTNESS_PRESETS = {0: -1, 1: 5, 2: 25, 3: 50, 4: 75, 5: 100}  # index -> percent, -1 = auto
 
 
 class Device:

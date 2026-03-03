@@ -220,7 +220,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
     hLayout->addWidget(titleLabel);
     hLayout->addStretch();
 
-    QStringList labels = {"Auto", "25%", "50%", "75%", "100%"};
+    QStringList labels = {"Auto", "5%", "25%", "50%", "75%", "100%"};
     int savedIdx = QString(params.get("ScreenBrightness").c_str()).toInt();
 
     auto *btnGroup = new QButtonGroup(brightnessFrame);
@@ -229,7 +229,7 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
       auto *btn = new QPushButton(labels[i], brightnessFrame);
       btn->setCheckable(true);
       btn->setChecked(i == savedIdx);
-      btn->setFixedSize(130, 80);
+      btn->setFixedSize(110, 80);
       btn->setStyleSheet(R"(
         QPushButton { border-radius: 40px; font-size: 35px; font-weight: 500; background-color: #393939; color: #e4e4e4; }
         QPushButton:checked { background-color: #33ab4c; }
@@ -238,10 +238,10 @@ DevicePanel::DevicePanel(SettingsWindow *parent) : ListWidget(parent) {
       btnGroup->addButton(btn, i);
       hLayout->addWidget(btn);
     }
-    const int brightness_values[] = {-1, 25, 50, 75, 100};
+    const int brightness_values[] = {-1, 5, 25, 50, 75, 100};
     QObject::connect(btnGroup, QOverload<int>::of(&QButtonGroup::buttonClicked), [=](int idx) {
       params.put("ScreenBrightness", std::to_string(idx));
-      if (idx >= 0 && idx < 5) device()->setBrightnessOverride(brightness_values[idx]);
+      if (idx >= 0 && idx < 6) device()->setBrightnessOverride(brightness_values[idx]);
     });
     addItem(brightnessFrame);
   }
