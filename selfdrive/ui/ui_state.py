@@ -144,6 +144,9 @@ class UIState:
       self.is_metric = False
 
 
+BRIGHTNESS_PRESETS = {0: -1, 1: 25, 2: 50, 3: 75, 4: 100}  # index -> percent, -1 = auto
+
+
 class Device:
   def __init__(self):
     self._ignition = False
@@ -156,6 +159,14 @@ class Device:
     self._last_brightness: int = 0
     self._brightness_filter = FirstOrderFilter(BACKLIGHT_OFFROAD, 10.00, 1 / DEFAULT_FPS)
     self._brightness_thread: threading.Thread | None = None
+
+    # Brightness override: -1 = auto, 0-100 = fixed percentage
+    self._brightness_override: int = -1
+    try:
+      idx = int(Params().get("ScreenBrightness") or "0")
+      self._brightness_override = BRIGHTNESS_PRESETS.get(idx, -1)
+    except (ValueError, UnknownKeyName):
+      pass
 
   def reset_interactive_timeout(self, timeout: int = -1) -> None:
     if timeout == -1:
@@ -177,19 +188,26 @@ class Device:
     # TODO: not yet used, should be used in prime widget for QR code, etc.
     self._offroad_brightness = min(max(brightness, 0), 100)
 
+  def set_brightness_override(self, value: int):
+    """Set brightness override. -1 = auto, 0-100 = fixed percentage."""
+    self._brightness_override = value
+
   def _update_brightness(self):
-    clipped_brightness = self._offroad_brightness
+    if self._brightness_override >= 0:
+      clipped_brightness = float(self._brightness_override)
+    else:
+      clipped_brightness = self._offroad_brightness
 
-    if ui_state.started and ui_state.light_sensor >= 0:
-      clipped_brightness = ui_state.light_sensor
+      if ui_state.started and ui_state.light_sensor >= 0:
+        clipped_brightness = ui_state.light_sensor
 
-      # CIE 1931 - https://www.photonstophotos.net/GeneralTopics/Exposure/Psychometric_Lightness_and_Gamma.htm
-      if clipped_brightness <= 8:
-        clipped_brightness = clipped_brightness / 903.3
-      else:
-        clipped_brightness = ((clipped_brightness + 16.0) / 116.0) ** 3.0
+        # CIE 1931 - https://www.photonstophotos.net/GeneralTopics/Exposure/Psychometric_Lightness_and_Gamma.htm
+        if clipped_brightness <= 8:
+          clipped_brightness = clipped_brightness / 903.3
+        else:
+          clipped_brightness = ((clipped_brightness + 16.0) / 116.0) ** 3.0
 
-      clipped_brightness = float(np.clip(100 * clipped_brightness, 10, 100))
+        clipped_brightness = float(np.clip(100 * clipped_brightness, 10, 100))
 
     brightness = round(self._brightness_filter.update(clipped_brightness))
     if not self._awake:

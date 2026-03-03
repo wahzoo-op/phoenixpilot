@@ -4,14 +4,14 @@ import json
 from openpilot.common.basedir import BASEDIR
 from openpilot.common.params import Params
 from openpilot.selfdrive.ui.onroad.driver_camera_dialog import DriverCameraDialog
-from openpilot.selfdrive.ui.ui_state import ui_state
+from openpilot.selfdrive.ui.ui_state import ui_state, device, BRIGHTNESS_PRESETS
 from openpilot.selfdrive.ui.widgets.pairing_dialog import PairingDialog
 from openpilot.system.hardware import TICI
 from openpilot.system.ui.lib.application import gui_app
 from openpilot.system.ui.widgets import Widget, DialogResult
 from openpilot.system.ui.widgets.confirm_dialog import confirm_dialog, alert_dialog
 from openpilot.system.ui.widgets.html_render import HtmlRenderer
-from openpilot.system.ui.widgets.list_view import text_item, button_item, dual_button_item
+from openpilot.system.ui.widgets.list_view import text_item, button_item, dual_button_item, multiple_button_item
 from openpilot.system.ui.widgets.option_dialog import MultiOptionDialog
 from openpilot.system.ui.widgets.scroller import Scroller
 
@@ -44,9 +44,14 @@ class DeviceLayout(Widget):
     dongle_id = self._params.get("DongleId") or "N/A"
     serial = self._params.get("HardwareSerial") or "N/A"
 
+    brightness_idx = int(self._params.get("ScreenBrightness") or "0")
+
     items = [
       text_item("Dongle ID", dongle_id),
       text_item("Serial", serial),
+      multiple_button_item("Screen Brightness", "Adjust screen brightness or use automatic light sensor",
+                           ["Auto", "25%", "50%", "75%", "100%"], selected_index=brightness_idx,
+                           button_width=130, callback=self._on_brightness_change),
       button_item("Pair Device", "PAIR", DESCRIPTIONS['pair_device'], callback=self._pair_device),
       button_item("Driver Camera", "PREVIEW", DESCRIPTIONS['driver_camera'], callback=self._show_driver_camera, enabled=ui_state.is_offroad),
       button_item("Reset Calibration", "RESET", DESCRIPTIONS['reset_calibration'], callback=self._reset_calibration_prompt),
@@ -146,5 +151,9 @@ class DeviceLayout(Widget):
     gui_app.set_modal_overlay(self._fcc_dialog,
       callback=lambda result: setattr(self, '_fcc_dialog', None),
     )
+
+  def _on_brightness_change(self, index: int):
+    self._params.put("ScreenBrightness", str(index))
+    device.set_brightness_override(BRIGHTNESS_PRESETS.get(index, -1))
 
   def _on_review_training_guide(self): pass
