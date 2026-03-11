@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import math
 import os
 import numpy as np
 import capnp
@@ -11,6 +12,7 @@ from openpilot.selfdrive.locationd.models.car_kf import CarKalman, ObservationKi
 from openpilot.selfdrive.locationd.models.constants import GENERATED_DIR
 from openpilot.selfdrive.locationd.helpers import PoseCalibrator, Pose
 from openpilot.common.swaglog import cloudlog
+from opendbc.car.ford.values import FordFlags
 
 MAX_ANGLE_OFFSET_DELTA = 20 * DT_MDL  # Max 20 deg/s
 ROLL_MAX_DELTA = np.radians(20.0) * DT_MDL  # 20deg in 1 second is well within curvature limits
@@ -252,6 +254,16 @@ def retrieve_initial_vehicle_params(params: Params, CP: car.CarParams, replay: b
     # When driving in wet conditions the stiffness can go down, and then be too low on the next drive
     # Without a way to detect this we have to reset the stiffness every drive
     stiffness_factor = 1.0
+
+  # 2015-19 Edge: StePinRelInit_An_Sns re-zeros every ignition cycle, so the saved
+  # angle offset is invalid.  Discard it and start with high initial covariance so the
+  # Kalman filter converges quickly (within ~1 min instead of 10+).
+  if CP.flags & FordFlags.PINION_ALT:
+    angle_offset_deg = 0.0
+    p_initial = CarKalman.P_initial.copy()
+    p_initial[States.ANGLE_OFFSET, States.ANGLE_OFFSET] = math.radians(5.0) ** 2
+    p_initial[States.ANGLE_OFFSET_FAST, States.ANGLE_OFFSET_FAST] = math.radians(5.0) ** 2
+    cloudlog.info("PINION_ALT: reset angle offset and increased initial covariance for fast convergence")
 
   if not retrieve_success:
     cloudlog.info("Parameter learner resetting to default values")
