@@ -262,7 +262,8 @@ def retrieve_initial_vehicle_params(params: Params, CP: car.CarParams, replay: b
     angle_offset_deg = 0.0
     p_initial = CarKalman.P_initial.copy()
     p_initial[States.ANGLE_OFFSET, States.ANGLE_OFFSET] = math.radians(5.0) ** 2
-    p_initial[States.ANGLE_OFFSET_FAST, States.ANGLE_OFFSET_FAST] = math.radians(5.0) ** 2
+    # Keep ANGLE_OFFSET_FAST covariance small to prevent spikes past OFFSET_MAX on startup
+    p_initial[States.ANGLE_OFFSET_FAST, States.ANGLE_OFFSET_FAST] = math.radians(1.0) ** 2
     cloudlog.info("PINION_ALT: reset angle offset and increased initial covariance for fast convergence")
 
   if not retrieve_success:
