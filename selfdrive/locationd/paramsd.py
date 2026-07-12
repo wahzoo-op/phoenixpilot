@@ -47,6 +47,14 @@ class VehicleParamsLearner:
 
     self.min_sr, self.max_sr = 0.5 * CP.steerRatio, 2.0 * CP.steerRatio
 
+    # PINION_ALT sensor re-zeros every ignition; offset can be legitimately large
+    if CP.flags & FordFlags.PINION_ALT:
+      self.offset_max = 180.0
+      self.offset_lowered_max = 160.0
+    else:
+      self.offset_max = OFFSET_MAX
+      self.offset_lowered_max = OFFSET_LOWERED_MAX
+
     self.calibrator = PoseCalibrator()
 
     self.observed_speed = 0.0
@@ -152,8 +160,8 @@ class VehicleParamsLearner:
       sensors_valid = bool(abs(self.observed_speed * (x[States.YAW_RATE].item() + self.observed_yaw_rate)) < LATERAL_ACC_SENSOR_THRESHOLD)
     else:
       sensors_valid = True
-    self.avg_offset_valid = check_valid_with_hysteresis(self.avg_offset_valid, self.avg_angle_offset, OFFSET_MAX, OFFSET_LOWERED_MAX)
-    self.total_offset_valid = check_valid_with_hysteresis(self.total_offset_valid, self.angle_offset, OFFSET_MAX, OFFSET_LOWERED_MAX)
+    self.avg_offset_valid = check_valid_with_hysteresis(self.avg_offset_valid, self.avg_angle_offset, self.offset_max, self.offset_lowered_max)
+    self.total_offset_valid = check_valid_with_hysteresis(self.total_offset_valid, self.angle_offset, self.offset_max, self.offset_lowered_max)
     self.roll_valid = check_valid_with_hysteresis(self.roll_valid, self.roll, ROLL_MAX, ROLL_LOWERED_MAX)
 
     msg = messaging.new_message('liveParameters')
