@@ -48,7 +48,8 @@ class VehicleParamsLearner:
     self.min_sr, self.max_sr = 0.5 * CP.steerRatio, 2.0 * CP.steerRatio
 
     # PINION_ALT sensor re-zeros every ignition; offset can be legitimately large
-    if CP.flags & FordFlags.PINION_ALT:
+    self.pinion_alt = bool(CP.flags & FordFlags.PINION_ALT)
+    if self.pinion_alt:
       self.offset_max = 180.0
       self.offset_lowered_max = 160.0
     else:
@@ -127,7 +128,12 @@ class VehicleParamsLearner:
     elif which == 'carState':
       steering_angle = msg.steeringAngleDeg
 
-      in_linear_region = abs(steering_angle) < 45
+      if self.pinion_alt and msg.vEgo > 10:
+        # PINION_ALT: sensor re-zeros at ignition so steering_angle includes the ignition offset.
+        # At highway speed the physical wheel angle must be small, so always allow KF updates.
+        in_linear_region = True
+      else:
+        in_linear_region = abs(steering_angle) < 45
       self.observed_speed = msg.vEgo
       self.active = self.observed_speed > MIN_ACTIVE_SPEED and in_linear_region
 
@@ -269,7 +275,7 @@ def retrieve_initial_vehicle_params(params: Params, CP: car.CarParams, replay: b
   if CP.flags & FordFlags.PINION_ALT:
     angle_offset_deg = 0.0
     p_initial = CarKalman.P_initial.copy()
-    p_initial[States.ANGLE_OFFSET, States.ANGLE_OFFSET] = math.radians(5.0) ** 2
+    p_initial[States.ANGLE_OFFSET, States.ANGLE_OFFSET] = math.radians(10.0) ** 2
     # Keep ANGLE_OFFSET_FAST covariance small to prevent spikes past OFFSET_MAX on startup
     p_initial[States.ANGLE_OFFSET_FAST, States.ANGLE_OFFSET_FAST] = math.radians(1.0) ** 2
     cloudlog.info("PINION_ALT: reset angle offset and increased initial covariance for fast convergence")
