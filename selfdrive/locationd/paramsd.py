@@ -50,11 +50,15 @@ class VehicleParamsLearner:
     # PINION_ALT sensor re-zeros every ignition; offset can be legitimately large
     self.pinion_alt = bool(CP.flags & FordFlags.PINION_ALT)
     if self.pinion_alt:
-      self.offset_max = 180.0
-      self.offset_lowered_max = 160.0
+      # Offset can be ±360°+ (ignition position of wheel); validity check is meaningless
+      self.offset_max = 9999.0
+      self.offset_lowered_max = 9999.0
+      # Allow faster tracking so desired angle corrects within ~2s instead of 10s+
+      self.max_angle_offset_delta = 60 * DT_MDL
     else:
       self.offset_max = OFFSET_MAX
       self.offset_lowered_max = OFFSET_LOWERED_MAX
+      self.max_angle_offset_delta = MAX_ANGLE_OFFSET_DELTA
 
     self.calibrator = PoseCalibrator()
 
@@ -155,9 +159,9 @@ class VehicleParamsLearner:
       x = self.kf.x
 
     self.avg_angle_offset = np.clip(np.degrees(x[States.ANGLE_OFFSET].item()),
-                                self.avg_angle_offset - MAX_ANGLE_OFFSET_DELTA, self.avg_angle_offset + MAX_ANGLE_OFFSET_DELTA)
+                                self.avg_angle_offset - self.max_angle_offset_delta, self.avg_angle_offset + self.max_angle_offset_delta)
     self.angle_offset = np.clip(np.degrees(x[States.ANGLE_OFFSET].item() + x[States.ANGLE_OFFSET_FAST].item()),
-                        self.angle_offset - MAX_ANGLE_OFFSET_DELTA, self.angle_offset + MAX_ANGLE_OFFSET_DELTA)
+                        self.angle_offset - self.max_angle_offset_delta, self.angle_offset + self.max_angle_offset_delta)
     self.roll = np.clip(float(x[States.ROAD_ROLL].item()), self.roll - ROLL_MAX_DELTA, self.roll + ROLL_MAX_DELTA)
     roll_std = float(P[States.ROAD_ROLL].item())
     if self.active and self.observed_speed > LOW_ACTIVE_SPEED:
